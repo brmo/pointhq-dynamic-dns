@@ -16,6 +16,8 @@ what we want this script to do
  - if they do not match, perform update, report success or failure of update
 */
 
+$date = date('M d, Y h:ia', time());
+
 function valid_ip($ip) {
 	return preg_match("/^([1-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])" .
 		"(\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}$/", $ip);
@@ -36,11 +38,11 @@ if ($_GET['i'] && valid_ip($_GET['i'])) { // ip address
 		$current_record_value=exec("nslookup ".escapeshellarg($hostname)." dns1.pointhq.com | grep Address | tail -1 | awk '{print $2}'");
 		if ($record) {
 			if ($current_record_value==$record['data']) {
-				exit('No update required: DNS record == current IP ('.$record['data'].')');
+				exit('(' . $date . ') -- No update required: DNS record == current IP (' . $record['data'] . ')');
 			} else {
-				if ($password && $recordid) {
+ 				if ($password && $recordid) {
 					print_r(exec("curl -H 'Accept: application/xml' -H 'Content-type: application/xml' http://pointhq.com/zones/".$zoneid."/records/".$recordid." -u ".$username.":".$password." -X PUT -d '<zone-record><data>".$record['data']."</data><name>".$hostname.".</name></zone-record>'"));
-					exit('DNS record updated: '.$hostname.' == '.$record['data']);
+					exit('(' . $date . ') -- DNS record updated: '.$hostname.' == ' . $record['data']);
 				} else {
 					//no password or recordid
 					exit($_SERVER['REMOTE_ADDR']);
